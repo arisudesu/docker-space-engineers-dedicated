@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    container_name: server
+    restart: unless-stopped
+    stop_grace_period: 1m
+    volumes:
+      - ./appdata/instance:/appdata/instance
+      - ./appdata/server:/appdata/server
+      - ./appuser/.local/share/Steam:/appuser/.local/share/Steam
+    ports:
+      - "27016:27016/udp"
