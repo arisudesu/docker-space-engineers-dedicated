@@ -55,7 +55,7 @@ fi
 
 echo "Preparation step: Remove server log files"
 
-if ! find $app_instance_dir -name "*.log" -type f -printf " %p\n" -exec rm {} \; ; then
+if ! find $app_instance_dir -maxdepth 1 -name "*.log" -type f -printf " %p\n" -exec rm {} \; ; then
 	echo >&2 "Warning: Failed to remove server log files."
 fi
 
