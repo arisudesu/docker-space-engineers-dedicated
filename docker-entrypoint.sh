@@ -6,10 +6,11 @@ readonly app_instance_cfg=/appdata/instance/SpaceEngineers-Dedicated.cfg
 
 readonly steam_app_id=298740
 
-readonly wine_app_instance_dir=Z:\\\\appdata\\\\instance
+readonly wine_app_instance_dir=Z:\\appdata\\instance
 
 IP=0.0.0.0
 SERVER_PORT=27016
+WORLD=World
 
 while [ $# != 0 ]; do
 	case "$1" in
@@ -19,6 +20,10 @@ while [ $# != 0 ]; do
 			;;
 		-port) [ -z "$2" ] && { echo >&2 "Error: option $1 requires argument"; exit 2; }
 			SERVER_PORT=$2
+			shift 2
+			;;
+		-world) [ -z "$2" ] && { echo >&2 "Error: option $1 requires argument"; exit 2; }
+			WORLD=$2
 			shift 2
 			;;
 		*)
@@ -61,15 +66,20 @@ fi
 
 echo "Preparation step: Update server configuration"
 
-if ! _sed_loadworld=$(sed -Ei "s;<LoadWorld>(.*)(\\\\Saves\\\\.*?)</LoadWorld>;<LoadWorld>$wine_app_instance_dir\\2</LoadWorld>;g w /dev/stdout" $app_instance_cfg); then
+_wine_app_instance_world_dir=$(echo "$wine_app_instance_dir\\Saves\\$WORLD" | sed 's;\\;\\\\;g')
+
+if ! _sed_loadworld=$(sed -Ei "s;<LoadWorld>(.*)</LoadWorld>;<LoadWorld>$_wine_app_instance_world_dir</LoadWorld>;g w /dev/stdout" $app_instance_cfg); then
 	echo >&2 "Error: Updating configuration in $app_instance_cfg: $?"
 	exit 5
 fi
 
 if [ -z "$_sed_loadworld" ]; then
-	echo >&2 "Warning: Failed to update <LoadWorld> value in $app_instance_cfg."
+	echo >&2 "Error: Failed to update <LoadWorld> value in $app_instance_cfg."
+	echo >&2 "       This option is updated automatically, but it is required to exist in file beforehand."
+	echo >&2 "       If in doubt, add <LoadWorld></LoadWorld> to config in front of </MyConfigDedicated>."
+	exit 5
 else
-	echo " Updated: $_sed_loadworld"
+	echo " Updated: $(echo "$_sed_loadworld" | sed -E 's;.*(<LoadWorld>.*</LoadWorld>).*;\1;')"
 fi
 
 if ! _sed_ip=$(sed -Ei "s;<IP>(.*)</IP>;<IP>$IP</IP>;g w /dev/stdout" $app_instance_cfg); then
@@ -80,7 +90,7 @@ fi
 if [ -z "$_sed_ip" ]; then
 	echo >&2 "Warning: Failed to update <IP> value in $app_instance_cfg."
 else
-	echo " Updated: $_sed_ip"
+	echo " Updated: $(echo "$_sed_ip" | sed -E 's;.*(<IP>.*</IP>).*;\1;')"
 fi
 
 if ! _sed_serverport=$(sed -Ei "s;<ServerPort>(.*)</ServerPort>;<ServerPort>$SERVER_PORT</ServerPort>;g w /dev/stdout" $app_instance_cfg); then
@@ -91,7 +101,7 @@ fi
 if [ -z "$_sed_serverport" ]; then
 	echo >&2 "Warning: Failed to update <ServerPort> value in $app_instance_cfg."
 else
-	echo " Updated: $_sed_serverport"
+	echo " Updated: $(echo "$_sed_serverport" | sed -E 's;.*(<ServerPort>.*</ServerPort>).*;\1;')"
 fi
 
 echo "Starting server..."
