@@ -55,6 +55,7 @@ RUN set -x \
     && chown steamuser: /appdata
 
 COPY docker-entrypoint.sh /
+RUN chmod 0755 /docker-entrypoint.sh
 
 USER 18000:18000
 
