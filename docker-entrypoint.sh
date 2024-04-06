@@ -127,6 +127,8 @@ until [ -n "$xpid" ] || [ "$rc" = 127 ]; do
 	wait -n -p xpid; rc=$?
 done
 
+trap - INT TERM
+
 if [ "$rc" != 0 ]; then
 	echo "Server shut down with non-zero status: $rc"
 	exit 1
