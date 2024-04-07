@@ -11,6 +11,7 @@ ENV WINEPREFIX=/appuser/.wineprefix
 
 RUN set -x \
     && apt update \
+    && apt upgrade -y \
     && apt install -y --no-install-recommends \
         ca-certificates \
         wget \
