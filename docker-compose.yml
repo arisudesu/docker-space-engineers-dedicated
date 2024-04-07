@@ -3,7 +3,6 @@ version: '3'
 services:
   server:
     build: .
-    restart: unless-stopped
     stop_grace_period: 1m
     volumes:
       - ./appdata/instance:/appdata/instance
