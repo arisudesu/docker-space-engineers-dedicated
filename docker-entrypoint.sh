@@ -120,11 +120,11 @@ trap '{
 	killall -s INT SpaceEngineersDedicated.exe
 }' INT TERM
 
-# $xpid is set if `wait` returns from exited process, and the $rc is that of
+# $pid is set if `wait` returns from exited process, and the $rc is that of
 # a exited process. Otherwise it means that `wait` was interrupted by a signal.
 # $rc=127 to correctly check if `wait` has no children to wait (why?).
-until [ -n "$xpid" ] || [ "$rc" = 127 ]; do
-	wait -n -p xpid; rc=$?
+until [ -n "$pid" ] || [ "$rc" = 127 ]; do
+	wait -n -p pid; rc=$?
 done
 
 trap - INT TERM
