@@ -12,23 +12,38 @@ IP=0.0.0.0
 SERVER_PORT=27016
 WORLD=World
 
+usage() {
+	echo "Usage: $0 -h"
+	echo "       $0 [-ip IP] [-port PORT] [-world WORLD]"
+}
+
+eargs() {
+	echo >&2 "$1"
+	echo >&2
+	usage >&2
+	exit 2
+}
+
 while [ $# != 0 ]; do
 	case "$1" in
-		-ip) [ -z "$2" ] && { echo >&2 "Error: option $1 requires argument"; exit 2; }
+		-ip) [ -z "$2" ] && eargs "$0: option $1 requires argument"
 			IP=$2
 			shift 2
 			;;
-		-port) [ -z "$2" ] && { echo >&2 "Error: option $1 requires argument"; exit 2; }
+		-port) [ -z "$2" ] && eargs "$0: option $1 requires argument"
 			SERVER_PORT=$2
 			shift 2
 			;;
-		-world) [ -z "$2" ] && { echo >&2 "Error: option $1 requires argument"; exit 2; }
+		-world) [ -z "$2" ] && eargs "$0: option $1 requires argument"
 			WORLD=$2
 			shift 2
 			;;
+		-h)
+			usage
+			exit 0
+			;;
 		*)
-			echo >&2 "Error: unrecognized option: $1"
-			exit 2
+			eargs "$0: unrecognized option: $1"
 			;;
 	esac
 done
