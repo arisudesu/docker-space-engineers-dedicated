@@ -66,6 +66,14 @@ if [ ! -f $app_instance_cfg ] || [ ! -w $app_instance_cfg ]; then
 	exit 3
 fi
 
+if _unowned_files=$(find 2>/dev/null $app_instance_dir ! \( -user "$(id -u)" -and -writable \) -printf " %p\n"); test -n "$_unowned_files"; then
+	echo >&2 "Error: Files were detected in $app_instance_dir that are not owned or writable."
+	echo >&2 "       For server to function correctly, all files must be owned by uid: $(id -u)."
+	echo >&2 "List of not owned files:"
+	echo >&2 "$_unowned_files"
+	exit 3
+fi
+
 echo "Preparation step: Install or validate server files"
 
 if ! /usr/games/steamcmd +force_install_dir $app_server_dir +login anonymous +@sSteamCmdForcePlatformType windows +app_update $steam_app_id validate +quit; then
