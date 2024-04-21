@@ -93,7 +93,7 @@ echo "Preparation step: Update server configuration"
 
 _wine_app_instance_world_dir=$(echo "$wine_app_instance_dir\\Saves\\$WORLD" | sed 's;\\;\\\\;g')
 
-if ! _sed_loadworld=$(sed -Ei "s;<LoadWorld>(.*)</LoadWorld>;<LoadWorld>$_wine_app_instance_world_dir</LoadWorld>;g w /dev/stdout" $app_instance_cfg); then
+if ! _sed_loadworld=$(sed -Ei "s;<LoadWorld>[^<]*</LoadWorld>;<LoadWorld>$_wine_app_instance_world_dir</LoadWorld>;g w /dev/stdout" $app_instance_cfg); then
 	echo >&2 "Error: Updating configuration in $app_instance_cfg: $?"
 	exit 5
 fi
@@ -104,10 +104,10 @@ if [ -z "$_sed_loadworld" ]; then
 	echo >&2 "       If in doubt, add <LoadWorld></LoadWorld> to config in front of </MyConfigDedicated>."
 	exit 5
 else
-	echo " Updated: $(echo "$_sed_loadworld" | sed -E 's;.*(<LoadWorld>.*</LoadWorld>).*;\1;')"
+	echo " Updated: $(echo "$_sed_loadworld" | grep -Eo '<LoadWorld>[^<]*</LoadWorld>' | sed -e '1!s/^/          /')"
 fi
 
-if ! _sed_ip=$(sed -Ei "s;<IP>(.*)</IP>;<IP>$IP</IP>;g w /dev/stdout" $app_instance_cfg); then
+if ! _sed_ip=$(sed -Ei "s;<IP>[^<]*</IP>;<IP>$IP</IP>;g w /dev/stdout" $app_instance_cfg); then
 	echo >&2 "Error: Updating configuration in $app_instance_cfg: $?"
 	exit 5
 fi
@@ -115,10 +115,10 @@ fi
 if [ -z "$_sed_ip" ]; then
 	echo >&2 "Warning: Failed to update <IP> value in $app_instance_cfg."
 else
-	echo " Updated: $(echo "$_sed_ip" | sed -E 's;.*(<IP>.*</IP>).*;\1;')"
+	echo " Updated: $(echo "$_sed_ip" | grep -Eo '<IP>[^<]*</IP>' | sed -e '1!s/^/          /')"
 fi
 
-if ! _sed_serverport=$(sed -Ei "s;<ServerPort>(.*)</ServerPort>;<ServerPort>$SERVER_PORT</ServerPort>;g w /dev/stdout" $app_instance_cfg); then
+if ! _sed_serverport=$(sed -Ei "s;<ServerPort>[^<]*</ServerPort>;<ServerPort>$SERVER_PORT</ServerPort>;g w /dev/stdout" $app_instance_cfg); then
 	echo >&2 "Error: Updating configuration in $app_instance_cfg: $?"
 	exit 5
 fi
@@ -126,7 +126,7 @@ fi
 if [ -z "$_sed_serverport" ]; then
 	echo >&2 "Warning: Failed to update <ServerPort> value in $app_instance_cfg."
 else
-	echo " Updated: $(echo "$_sed_serverport" | sed -E 's;.*(<ServerPort>.*</ServerPort>).*;\1;')"
+	echo " Updated: $(echo "$_sed_serverport" | grep -Eo '<ServerPort>[^<]*</ServerPort>' | sed -e '1!s/^/          /')"
 fi
 
 echo "Starting server..."
