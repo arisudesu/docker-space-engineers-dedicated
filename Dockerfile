@@ -2,8 +2,8 @@ FROM debian:bookworm-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG WINE_BRANCH=stable
-ARG WINE_VERSION=9.0.0.0~bookworm-1
+ARG WINE_BRANCH=staging
+ARG WINE_VERSION=9.8~bookworm-1
 
 ENV WINEARCH=win64
 ENV WINEDEBUG=-all
