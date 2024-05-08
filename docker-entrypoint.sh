@@ -8,8 +8,8 @@ readonly steam_app_id=298740
 
 readonly wine_app_instance_dir=Z:\\appdata\\instance
 
-IP=0.0.0.0
-SERVER_PORT=27016
+unset IP
+unset PORT
 WORLD=World
 
 usage() {
@@ -31,7 +31,7 @@ while [ $# != 0 ]; do
 			shift 2
 			;;
 		-port) [ -z "$2" ] && eargs "$0: option $1 requires argument"
-			SERVER_PORT=$2
+			PORT=$2
 			shift 2
 			;;
 		-world) [ -z "$2" ] && eargs "$0: option $1 requires argument"
@@ -107,28 +107,6 @@ else
 	echo " Updated: $(echo "$_sed_loadworld" | grep -Eo '<LoadWorld>[^<]*</LoadWorld>' | sed -e '1!s/^/          /')"
 fi
 
-if ! _sed_ip=$(sed -Ei "s;<IP>[^<]*</IP>;<IP>$IP</IP>;g w /dev/stdout" $app_instance_cfg); then
-	echo >&2 "Error: Updating configuration in $app_instance_cfg: $?"
-	exit 5
-fi
-
-if [ -z "$_sed_ip" ]; then
-	echo >&2 "Warning: Failed to update <IP> value in $app_instance_cfg."
-else
-	echo " Updated: $(echo "$_sed_ip" | grep -Eo '<IP>[^<]*</IP>' | sed -e '1!s/^/          /')"
-fi
-
-if ! _sed_serverport=$(sed -Ei "s;<ServerPort>[^<]*</ServerPort>;<ServerPort>$SERVER_PORT</ServerPort>;g w /dev/stdout" $app_instance_cfg); then
-	echo >&2 "Error: Updating configuration in $app_instance_cfg: $?"
-	exit 5
-fi
-
-if [ -z "$_sed_serverport" ]; then
-	echo >&2 "Warning: Failed to update <ServerPort> value in $app_instance_cfg."
-else
-	echo " Updated: $(echo "$_sed_serverport" | grep -Eo '<ServerPort>[^<]*</ServerPort>' | sed -e '1!s/^/          /')"
-fi
-
 echo "Starting server..."
 
 if ! cd $app_server_dir/DedicatedServer64; then
@@ -138,7 +116,7 @@ fi
 
 # NB: When current script is executed directly, logging to stdout does not work.
 #     It works fine when the script is run from Dockerfile ENTRYPOINT directive.
-wine SpaceEngineersDedicated.exe -noconsole -ignorelastsession -path $wine_app_instance_dir &
+wine SpaceEngineersDedicated.exe -noconsole -ignorelastsession -path $wine_app_instance_dir ${IP:+-ip} "$IP" ${PORT:+-port} "$PORT" &
 
 trap '{
 	echo "Sending SIGINT to server process..."
