@@ -4,6 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ARG WINE_BRANCH=staging
 ARG WINE_VERSION=9.8~bookworm-1
+ARG WINE_MONO_VERSION=9.1.0
 
 ENV WINEARCH=win64
 ENV WINEDEBUG=-all
@@ -25,30 +26,33 @@ RUN set -x \
     && apt update \
     && apt install -y --no-install-recommends \
         cabextract \
-        psmisc \
+        procps \
         steamcmd \
         winehq-${WINE_BRANCH}=${WINE_VERSION} \
         wine-${WINE_BRANCH}-i386=${WINE_VERSION} \
         wine-${WINE_BRANCH}-amd64=${WINE_VERSION} \
         wine-${WINE_BRANCH}=${WINE_VERSION} \
+        xauth \
         xvfb \
     && wget -O /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
     && chmod 0755 /usr/local/bin/winetricks \
     && groupadd -g 18000 steamuser \
     && useradd -u 18000 -s /bin/bash -m -d /appuser -g steamuser steamuser \
     && su steamuser -c 'set -x \
-        && Xvfb :5 -screen 0 1024x768x16 & xsrvpid=$! \
-        && env WINEDLLOVERRIDES="mscoree=d" wineboot --init /nogui \
-        && wine winecfg /v win10 \
-        && winetricks corefonts \
+        && wineboot --init \
+        && winecfg -v win10 \
         && winetricks sound=disabled \
-        && env DISPLAY=:5.0 winetricks -q vcrun2019 \
-        && env DISPLAY=:5.0 winetricks -q --force dotnet48 \
-        && kill $xsrvpid \
-        && wait' \
+        && winetricks corefonts \
+        && xvfb-run winetricks -q vcrun2019 \
+        && winecfg -v win10 \
+        && wget -O /tmp/wine-mono.msi https://dl.winehq.org/wine/wine-mono/$WINE_MONO_VERSION/wine-mono-$WINE_MONO_VERSION-x86.msi \
+        && wine /tmp/wine-mono.msi \
+        && rm /tmp/wine-mono.msi \
+        && wineserver -w' \
     && rm -rf /appuser/.cache \
     && apt autoremove -y --purge \
         cabextract \
+        xauth \
         xvfb \
         wget \
     && rm -rf /var/lib/apt/lists/* \

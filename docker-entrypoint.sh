@@ -142,7 +142,7 @@ wine SpaceEngineersDedicated.exe -noconsole -ignorelastsession -path $wine_app_i
 
 trap '{
 	echo "Sending SIGINT to server process..."
-	killall -s INT SpaceEngineersDedicated.exe
+	pkill -INT -f SpaceEngineersDedicated.exe
 }' INT TERM
 
 # $pid is set if `wait` returns from exited process, and the $rc is that of
